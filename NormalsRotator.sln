@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalsRotator", "NormalsRotator\NormalsRotator.vcxproj", "{AC0F979A-98DD-8AA0-8171-FBC66DDE6605}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Elysium", "Elysium\Elysium.vcxproj", "{0D94EDC7-7973-6C63-828B-F739EEE9D2C4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Dist|x64 = Dist|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AC0F979A-98DD-8AA0-8171-FBC66DDE6605}.Debug|x64.ActiveCfg = Debug|x64
+		{AC0F979A-98DD-8AA0-8171-FBC66DDE6605}.Debug|x64.Build.0 = Debug|x64
+		{AC0F979A-98DD-8AA0-8171-FBC66DDE6605}.Dist|x64.ActiveCfg = Dist|x64
+		{AC0F979A-98DD-8AA0-8171-FBC66DDE6605}.Dist|x64.Build.0 = Dist|x64
+		{AC0F979A-98DD-8AA0-8171-FBC66DDE6605}.Release|x64.ActiveCfg = Release|x64
+		{AC0F979A-98DD-8AA0-8171-FBC66DDE6605}.Release|x64.Build.0 = Release|x64
+		{0D94EDC7-7973-6C63-828B-F739EEE9D2C4}.Debug|x64.ActiveCfg = Debug|x64
+		{0D94EDC7-7973-6C63-828B-F739EEE9D2C4}.Debug|x64.Build.0 = Debug|x64
+		{0D94EDC7-7973-6C63-828B-F739EEE9D2C4}.Dist|x64.ActiveCfg = Dist|x64
+		{0D94EDC7-7973-6C63-828B-F739EEE9D2C4}.Dist|x64.Build.0 = Dist|x64
+		{0D94EDC7-7973-6C63-828B-F739EEE9D2C4}.Release|x64.ActiveCfg = Release|x64
+		{0D94EDC7-7973-6C63-828B-F739EEE9D2C4}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
