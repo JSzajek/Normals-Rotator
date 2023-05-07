@@ -12,9 +12,9 @@
 
 #include "Elysium/Factories/ShaderFactory.h"
 
-#include <imgui_internal.h>
+#include <imgui/imgui_internal.h>
 
-#include <IconsFontAwesome5.h>
+#include <iconfontcppheaders/IconsFontAwesome5.h>
 
 NormsEditorLayer::NormsEditorLayer()
 {
