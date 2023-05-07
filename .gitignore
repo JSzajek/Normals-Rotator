@@ -27,11 +27,11 @@
 *.out
 *.app
 
-*.user
 
 # Visual studio files
 *.vcxproj
 *.filters
+*.vcxproj.user
 
 .vs/
 .git/
