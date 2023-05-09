@@ -32,6 +32,7 @@
 *.vcxproj
 *.filters
 *.vcxproj.user
+*.vcxproj.filters
 
 .vs/
 .git/

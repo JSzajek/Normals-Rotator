@@ -12,12 +12,16 @@
 
 #include "Elysium/Factories/ShaderFactory.h"
 
-#include <imgui/imgui_internal.h>
+#include <imgui_internal.h>
 
 #include <iconfontcppheaders/IconsFontAwesome5.h>
 
+#include <opencv2/opencv.hpp>
+
 NormsEditorLayer::NormsEditorLayer()
 {
+	cv::Mat img = cv::imread("C:/Users/Justin/Desktop/normal_map_example.png");
+	cv::imwrite("C:/Users/Justin/Desktop/test.png", img);
 	//m_outputTextureId = m_pipeline.GetOutput();
 
 	m_exampleNormalsMap = Elysium::Texture2D::Create("Content/textures/normal_map_example.png");
