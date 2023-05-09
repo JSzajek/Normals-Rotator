@@ -33,6 +33,7 @@
 *.filters
 *.vcxproj.user
 *.vcxproj.filters
+*.sln
 
 .vs/
 .git/
