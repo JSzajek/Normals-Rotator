@@ -5,7 +5,7 @@
 
 ViewerPanel::ViewerPanel(uint32_t* colorTextureId)
 	: m_colorTextureID(colorTextureId),
-	m_size(0), m_focused(false), m_hovered(false)
+	m_size(0), m_focused(false), m_hovered(false), m_sizeChanged(false)
 {
 	m_initialMousePosition = { 0 };
 	m_orthoFocalPoint = { 0, 0 };
@@ -38,6 +38,8 @@ void ViewerPanel::OnImGuiRender()
 		m_size.x = static_cast<uint32_t>(panelSize.x);
 		m_size.y = static_cast<uint32_t>(panelSize.y);
 
+		m_sizeChanged = true;
+
 		UpdateCameraProjection();
 	}
 
@@ -65,7 +67,7 @@ void ViewerPanel::FocusOnRect(const Elysium::RectTransformComponent& component)
 {
 	const Elysium::Math::Vec2 rectSize = component.GetDimensions() * component.GetScale();
 	
-	const float maxScale = std::max(rectSize.x, rectSize.y);
+	const float maxScale = std::max(rectSize.x, rectSize.y) + 15 /* Buffer Constant */;
 
 	m_orthoFocalPoint = component.GetCenter();
 	m_orthoSize = maxScale;

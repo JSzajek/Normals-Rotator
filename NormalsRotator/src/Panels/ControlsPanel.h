@@ -17,6 +17,7 @@ public:
 public:
 	inline bool GetRecenterFocus() const { return m_recenterFocus; }
 	inline float GetRotationDegree() const { return m_rotationDegrees; }
+	inline bool GetClipToOriginalDimensions() const { return m_clipOriginalDimensions; }
 	inline bool GetFlipHorizontal() const { return m_flipHorizontal; }
 	inline bool GetFlipVertical() const { return m_flipVertical; }
 	inline bool GetFlipRed() const { return m_flipRed; }
@@ -28,6 +29,8 @@ private:
 
 	bool m_recenterFocus;
 	float m_rotationDegrees;
+	bool m_clipOriginalDimensions;
+
 	bool m_flipHorizontal;
 	bool m_flipVertical;
 	bool m_flipRed;

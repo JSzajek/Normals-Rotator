@@ -7,6 +7,7 @@ ControlsPanel::ControlsPanel()
 	: m_focused(false), m_hovered(false),
 	m_recenterFocus(true),
 	m_rotationDegrees(0),
+	m_clipOriginalDimensions(false),
 	m_flipHorizontal(false),
 	m_flipVertical(false),
 	m_flipRed(false),
@@ -53,6 +54,11 @@ void ControlsPanel::OnImGuiRender()
 	if (ImGui::Button("90-CW"))
 	{
 		m_rotationDegrees = 90;
+		m_changed = true;
+	}
+
+	if (ImGui::Checkbox("Clip To Original Dimensions", &m_clipOriginalDimensions))
+	{
 		m_changed = true;
 	}
 

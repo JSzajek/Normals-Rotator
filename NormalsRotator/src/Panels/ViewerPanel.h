@@ -19,6 +19,12 @@ public:
 
 	inline bool IsFocused() const { return m_focused; }
 	inline bool IsHovered() const { return m_hovered; }
+	inline bool HasViewSizeChange() 
+	{ 
+		if (m_sizeChanged) 
+			m_sizeChanged = false; 
+		return true; 
+	}
 
 	inline Elysium::Shared<Elysium::OrthographicCamera> GetCamera() const { return m_camera; }
 
@@ -41,6 +47,7 @@ private:
 
 	bool m_focused;
 	bool m_hovered;
+	bool m_sizeChanged;
 
 	Elysium::Math::Vec2 m_orthoFocalPoint;
 	float m_orthoSize;
