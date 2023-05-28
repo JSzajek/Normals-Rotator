@@ -63,13 +63,11 @@ void ViewerPanel::OnEvent(Elysium::Event& _event)
 	dispatcher.Dispatch<Elysium::KeyReleasedEvent>(BIND_EVENT_FN(ViewerPanel::OnKeyReleased));
 }
 
-void ViewerPanel::FocusOnRect(const Elysium::RectTransformComponent& component)
+void ViewerPanel::FocusOnRect(const Elysium::Math::Vec2& center, const Elysium::Math::Vec2& rectSize)
 {
-	const Elysium::Math::Vec2 rectSize = component.GetDimensions() * component.GetScale();
-	
 	const float maxScale = std::max(rectSize.x, rectSize.y) + 15 /* Buffer Constant */;
 
-	m_orthoFocalPoint = component.GetCenter();
+	m_orthoFocalPoint = center;
 	m_orthoSize = maxScale;
 
 	UpdateCameraView();

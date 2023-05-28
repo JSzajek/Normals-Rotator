@@ -54,7 +54,7 @@ NormsEditorLayer::NormsEditorLayer()
 	m_normalsFBO = Elysium::FrameBuffer::Create(bufferspecs);
 
 	// Set the sprite component to render the results of the normals FBO
-	spriteComp.Texture = Elysium::Texture2D::Create(m_normalsFBO->GetColorAttachementRendererID(), 0, 0);
+	spriteComp.Texture = Elysium::Texture2D::Create(m_normalsFBO->GetColorAttachementRendererID(), 0u, 0u);
 
 	m_outputTextureId = m_fbo->GetColorAttachementRendererID();
 
@@ -85,8 +85,7 @@ NormsEditorLayer::~NormsEditorLayer()
 
 void NormsEditorLayer::OnAttach()
 {
-	OpenFile(Elysium::FileUtils::GetAssetPath_Str(ExampleFilePath));
-	m_isExampleFile = true;
+	OpenExampleFile();
 }
 
 void NormsEditorLayer::OnDetach()
@@ -105,7 +104,7 @@ void NormsEditorLayer::OnUpdate()
 	m_normalsRotatorShader->SetFloat("rotation_rad", rotation_rad);
 
 	Elysium::GraphicsCalls::ClearBuffers();
-	Elysium::RenderCommands::DrawTexture(m_normalsFBO, Elysium::TextureDrawType::Color, m_activeTexture, m_normalsRotatorShader);
+	Elysium::RenderCommands::DrawTexture(m_normalsFBO, Elysium::RenderCommands::TextureDrawType::Color, m_activeTexture, m_normalsRotatorShader);
 	m_normalsRotatorShader->Unbind();
 
 	m_fbo->Bind();
@@ -132,18 +131,10 @@ void NormsEditorLayer::OnUpdate()
 
 	if (m_controlsPanel->HasChange())
 	{
-		auto& spriteComp = m_sprite.GetComponent<Elysium::SpriteComponent>();
 		auto& rectComp = m_sprite.GetComponent<Elysium::RectTransformComponent>();
 
-		// Recenter the camera onto the sprite
-		if (m_controlsPanel->GetRecenterFocus())
-		{
-			if (spriteComp.Texture->GetWidth() > 0 && spriteComp.Texture->GetHeight() > 0) 
-				m_viewerPanel->FocusOnRect(rectComp);
-		}
-
 		rectComp.SetRotationDegrees(m_controlsPanel->GetRotationDegree());
-		CalculateOutputDimensions(m_controlsPanel->GetClipToOriginalDimensions());
+		CalculateOutputDimensions();
 
 		m_controlsPanel->FlushChangeState();
 	}
@@ -222,11 +213,15 @@ void NormsEditorLayer::OnImGuiRender()
 			}
 			if (ImGui::MenuItem(ICON_FA_ARCHIVE "  Open Example", "Ctrl + E"))
 			{
-				OpenFile(Elysium::FileUtils::GetAssetPath_Str(ExampleFilePath));
-				m_isExampleFile = true;
+				OpenExampleFile();
 			}
 			ImGui::EndMenu();
 		}
+		if (ImGui::MenuItem("Recenter", ""))
+		{
+			Recenter();
+		}
+
 		ImGui::EndMenuBar();
 	}
 
@@ -250,8 +245,6 @@ void NormsEditorLayer::OnEvent(Elysium::Event& _event)
 	dispatcher.Dispatch<Elysium::WindowResizeEvent>(BIND_EVENT_FN(NormsEditorLayer::OnWindowResize));
 	dispatcher.Dispatch<Elysium::KeyPressedEvent>(BIND_EVENT_FN(NormsEditorLayer::OnKeyPressed));
 	dispatcher.Dispatch<Elysium::KeyReleasedEvent>(BIND_EVENT_FN(NormsEditorLayer::OnKeyReleased));
-
-	m_controlsPanel->OnEvent(_event);
 
 	if (m_viewerPanel->IsHovered() || m_viewerPanel->IsFocused())
 		m_viewerPanel->OnEvent(_event);
@@ -298,6 +291,9 @@ bool NormsEditorLayer::OnKeyPressed(Elysium::KeyPressedEvent& _event)
 			}
 			break;
 		}
+		case Elysium::Key::F:
+			Recenter();
+			break;
 	}
 	return false;
 }
@@ -320,6 +316,14 @@ bool NormsEditorLayer::OnKeyReleased(Elysium::KeyReleasedEvent& _event)
 			break;
 	}
 	return false;
+}
+
+void NormsEditorLayer::Recenter()
+{
+	auto& rectComp = m_sprite.GetComponent<Elysium::RectTransformComponent>();
+
+	if (m_activeTexture->GetWidth() > 0 && m_activeTexture->GetHeight() > 0)
+		m_viewerPanel->FocusOnRect(rectComp.GetCenter(), { (float)m_outputSize.x, (float)m_outputSize.y });
 }
 
 void NormsEditorLayer::OpenFileDialog()
@@ -345,6 +349,15 @@ void NormsEditorLayer::SaveFileDialog()
 
 	if (!filepath.empty())
 		SaveCurrentImage(filepath);
+}
+
+void NormsEditorLayer::OpenExampleFile()
+{
+	m_isExampleFile = true;
+
+	OpenFile(Elysium::FileUtils::GetAssetPath_Str(ExampleFilePath));
+
+	m_currentFilePath = ExampleFilePath;
 }
 
 void NormsEditorLayer::OpenFile(const std::string& filepath)
@@ -374,6 +387,8 @@ void NormsEditorLayer::OpenFile(const std::string& filepath)
 	const uint32_t dataSize = width * height * 3;
 	m_activeTexture->SetData((void*)convertedImg.data, dataSize);
 
+	m_propertiesPanel->SetImageProperties(m_isExampleFile ? "Example_File" : filepath, m_activeTexture);
+
 	m_normalsFBO->Resize(width, height);
 
 	if (width > 0 && height > 0)
@@ -381,11 +396,15 @@ void NormsEditorLayer::OpenFile(const std::string& filepath)
 		auto& rectComp = m_sprite.GetComponent<Elysium::RectTransformComponent>();
 		auto& spriteComp = m_sprite.GetComponent<Elysium::SpriteComponent>();
 
-		rectComp.SetDimensions({ (float)width, (float)height });
-		rectComp.SetPivotOffset({ width * 0.5f, height * 0.5f });
-		m_viewerPanel->FocusOnRect(rectComp);
+		const Elysium::Math::Vec2 dim((float)width, (float)height);
+		const Elysium::Math::Vec2 pivotOffset(width * 0.5f, height * 0.5f);
+		rectComp.SetDimensions(dim);
+		rectComp.SetPivotOffset(pivotOffset);
+		m_viewerPanel->FocusOnRect(pivotOffset, dim);
 
-		CalculateOutputDimensions(m_controlsPanel->GetClipToOriginalDimensions());
+		CalculateOutputDimensions();
+
+		m_controlsPanel->SetClipDimensions({ 0, 0, (int)width, (int)height });
 	}
 
 	m_currentFilePath = filepath;
@@ -393,7 +412,7 @@ void NormsEditorLayer::OpenFile(const std::string& filepath)
 
 void NormsEditorLayer::SaveCurrentImage(const std::string& outputFilepath)
 {
-	if (m_isExampleFile)
+	if (m_isExampleFile && m_currentFilePath == outputFilepath)
 		return;
 
 	// Retrieve the fbo data that represents the rotated normals
@@ -429,24 +448,22 @@ void NormsEditorLayer::SaveCurrentImage(const std::string& outputFilepath)
 	cv::imwrite(outputFilepath, rotatedImage);
 }
 
-void NormsEditorLayer::CalculateOutputDimensions(bool clipToDimensions)
+void NormsEditorLayer::CalculateOutputDimensions()
 {
-	if (clipToDimensions)
+	if (m_controlsPanel->GetIsClipped())
 	{
 		auto& gizmoBoundsComp = m_sprite.GetComponent<Elysium::GizmoRectComponent>();
-		auto& rectComp = m_sprite.GetComponent<Elysium::RectTransformComponent>();
 
-		const Elysium::Math::Vec2 translation = rectComp.GetTranslation();
-		const Elysium::Math::Vec2 dimension = rectComp.GetDimensions();
+		const Elysium::Math::iVec4 clipDims = m_controlsPanel->GetClipDimensions();
 
-		gizmoBoundsComp.SetTranslation(translation);
-		gizmoBoundsComp.SetDimensions(dimension);
+		gizmoBoundsComp.SetTranslation({ (float)clipDims.x, (float)clipDims.y });
+		gizmoBoundsComp.SetDimensions({ (float)clipDims.z, (float)clipDims.w });
 
-		m_outputSize.x = static_cast<int32_t>(dimension.x);
-		m_outputSize.y = static_cast<int32_t>(dimension.y);
+		m_outputSize.x = static_cast<int32_t>(clipDims.z);
+		m_outputSize.y = static_cast<int32_t>(clipDims.w);
 
-		m_outputOffset.x = static_cast<int32_t>(translation.x);
-		m_outputOffset.y = static_cast<int32_t>(translation.y);
+		m_outputOffset.x = static_cast<int32_t>(clipDims.x);
+		m_outputOffset.y = static_cast<int32_t>(clipDims.y);
 	}
 	else
 	{

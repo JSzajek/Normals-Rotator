@@ -3,8 +3,6 @@
 #include "Elysium.h"
 #include "Elysium/Scene/Entity.h"
 
-#include "ShaderPipeline.h"
-
 class ViewerPanel;
 class ControlsPanel;
 class PropertiesPanel;
@@ -40,11 +38,13 @@ private:
 	bool OnKeyPressed(Elysium::KeyPressedEvent& _event);
 	bool OnKeyReleased(Elysium::KeyReleasedEvent& _event);
 private:
+	void Recenter();
 	void OpenFileDialog();
 	void SaveFileDialog();
+	void OpenExampleFile();
 	void OpenFile(const std::string& filepath);
 	void SaveCurrentImage(const std::string& outputFilepath);
-	void CalculateOutputDimensions(bool clipToDimensions);
+	void CalculateOutputDimensions();
 private:
 	Elysium::Unique<ViewerPanel> m_viewerPanel;
 	Elysium::Unique<ControlsPanel> m_controlsPanel;
@@ -67,7 +67,6 @@ private:
 	std::string m_currentFilePath;
 	bool m_isExampleFile;
 
-	ShaderPipeline m_pipeline;
 	uint32_t m_outputTextureId;
 
 	Elysium::Math::iVec2 m_outputSize;

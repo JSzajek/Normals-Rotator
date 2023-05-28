@@ -8,16 +8,15 @@ public:
 	ControlsPanel();
 public:
 	void OnImGuiRender();
-	void OnEvent(Elysium::Event& _event);
 
 	inline bool HasChange() const { return m_changed; }
 	void FlushChangeState();
-
-	bool OnKeyPressed(Elysium::KeyPressedEvent& _event);
 public:
-	inline bool GetRecenterFocus() const { return m_recenterFocus; }
+	void SetClipDimensions(const Elysium::Math::iVec4& clipDims) { m_clipDimensions = clipDims; }
+
 	inline float GetRotationDegree() const { return m_rotationDegrees; }
-	inline bool GetClipToOriginalDimensions() const { return m_clipOriginalDimensions; }
+	inline bool GetIsClipped() const { return m_isClipped; }
+	inline Elysium::Math::iVec4  GetClipDimensions() const { return m_clipDimensions; }
 	inline bool GetFlipHorizontal() const { return m_flipHorizontal; }
 	inline bool GetFlipVertical() const { return m_flipVertical; }
 	inline bool GetFlipRed() const { return m_flipRed; }
@@ -27,9 +26,10 @@ private:
 	bool m_focused;
 	bool m_hovered;
 
-	bool m_recenterFocus;
 	float m_rotationDegrees;
-	bool m_clipOriginalDimensions;
+
+	bool m_isClipped;
+	Elysium::Math::iVec4 m_clipDimensions;
 
 	bool m_flipHorizontal;
 	bool m_flipVertical;

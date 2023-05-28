@@ -28,7 +28,7 @@ public:
 
 	inline Elysium::Shared<Elysium::OrthographicCamera> GetCamera() const { return m_camera; }
 
-	void FocusOnRect(const Elysium::RectTransformComponent& component);
+	void FocusOnRect(const Elysium::Math::Vec2& center, const Elysium::Math::Vec2& rectSize);
 private:
 	bool OnMouseMove(Elysium::MouseMovedEvent& _event);
 	bool OnMouseScroll(Elysium::MouseScrolledEvent& _event);

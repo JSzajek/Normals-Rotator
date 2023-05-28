@@ -2,12 +2,13 @@
 #include "ControlsPanel.h"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 ControlsPanel::ControlsPanel()
 	: m_focused(false), m_hovered(false),
-	m_recenterFocus(true),
 	m_rotationDegrees(0),
-	m_clipOriginalDimensions(false),
+	m_isClipped(false),
+	m_clipDimensions(0),
 	m_flipHorizontal(false),
 	m_flipVertical(false),
 	m_flipRed(false),
@@ -23,17 +24,11 @@ void ControlsPanel::OnImGuiRender()
 	if (!ImGui::Begin("Controls Panel", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar))
 		ImGui::End();
 
-	if (ImGui::Button("Recenter"))
-	{
-		m_recenterFocus = true;
-		m_changed = true;
-	}
-
 	// Rotation
 	ImGui::Text("Rotation Controls");
 	ImGui::Text("Degrees ");
 	ImGui::SameLine();
-	if (ImGui::SliderFloat("##rotation_degrees", &m_rotationDegrees, 0, 360, "%0.3f"))
+	if (ImGui::DragFloat("##rotation_degrees", &m_rotationDegrees, 1, 0, 360, "%0.3f"))
 	{
 		m_changed = true;
 	}
@@ -56,13 +51,52 @@ void ControlsPanel::OnImGuiRender()
 		m_rotationDegrees = 90;
 		m_changed = true;
 	}
-
-	if (ImGui::Checkbox("Clip To Original Dimensions", &m_clipOriginalDimensions))
+	
+	ImGui::Spacing();
+	
+	ImGui::Text("Clipping:");
+	if (ImGui::Checkbox("Clip Output", &m_isClipped))
 	{
 		m_changed = true;
 	}
 
-	ImGui::Text("Image Flip");
+	if (m_isClipped)
+	{
+		ImGui::Text("Crop Dimensions");
+
+		ImGui::Columns(4, "dims_columns", false);
+		ImGui::SetColumnWidth(-1, 30);
+		ImGui::Text("X");
+		ImGui::Text("W");
+		ImGui::NextColumn();
+		ImGui::SetColumnWidth(-1, 100);
+		if (ImGui::DragInt("##x-offset", &m_clipDimensions[0]))
+		{
+			m_changed = true;
+		}
+		if (ImGui::DragInt("##width", &m_clipDimensions[2]))
+		{
+			m_changed = true;
+		}
+		ImGui::NextColumn();
+		ImGui::SetColumnWidth(-1, 30);
+		ImGui::Text("Y");
+		ImGui::Text("H");
+		ImGui::NextColumn();
+		ImGui::SetColumnWidth(-1, 100);
+		if (ImGui::DragInt("##y-offset", &m_clipDimensions[1]))
+		{
+			m_changed = true;
+		}
+		if (ImGui::DragInt("##height", &m_clipDimensions[3]))
+		{
+			m_changed = true;
+		}
+		
+		ImGui::EndColumns();
+	}
+
+	ImGui::Text("Image Flip [WIP]");
 	if (ImGui::Checkbox("Flip Horizontal", &m_flipHorizontal))
 	{
 		m_changed = true;
@@ -73,7 +107,7 @@ void ControlsPanel::OnImGuiRender()
 	}
 
 	ImGui::Spacing();
-	ImGui::Text("Flip Channels");
+	ImGui::Text("Flip Channels [WIP]");
 	if (ImGui::Checkbox("Flip Red Channel", &m_flipRed))
 	{
 		m_changed = true;
@@ -91,27 +125,7 @@ void ControlsPanel::OnImGuiRender()
 	ImGui::PopStyleVar();
 }
 
-void ControlsPanel::OnEvent(Elysium::Event& _event)
-{
-	Elysium::EventDispatcher dispatcher(_event);
-
-	dispatcher.Dispatch<Elysium::KeyPressedEvent>(BIND_EVENT_FN(ControlsPanel::OnKeyPressed));
-}
-
 void ControlsPanel::FlushChangeState()
 {
-	m_recenterFocus = false;
-
 	m_changed = false;
-}
-
-bool ControlsPanel::OnKeyPressed(Elysium::KeyPressedEvent& _event)
-{
-	if (_event.GetKeyCode() == Elysium::Key::F)
-	{
-		m_recenterFocus = true;
-		m_changed = true;
-	}
-
-	return false;
 }
