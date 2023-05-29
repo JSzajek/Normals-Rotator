@@ -5,6 +5,7 @@
 #include "Panels/ViewerPanel.h"
 #include "Panels/ControlsPanel.h"
 #include "Panels/PropertiesPanel.h"
+#include "Panels/GroupExportPanel.h"
 
 #include "Elysium/Factories/ShaderFactory.h"
 
@@ -28,6 +29,7 @@ NormsEditorLayer::NormsEditorLayer()
 	m_viewerPanel = Elysium::CreateUnique<ViewerPanel>(&m_outputTextureId);
 	m_controlsPanel = Elysium::CreateUnique<ControlsPanel>();
 	m_propertiesPanel = Elysium::CreateUnique<PropertiesPanel>();
+	m_groupExportPanel = Elysium::CreateUnique<GroupExportPanel>();
 
 	m_scene = Elysium::CreateShared<Elysium::Scene>();
 
@@ -41,7 +43,6 @@ NormsEditorLayer::NormsEditorLayer()
 	gizmoRectComp.SetTranslation({ 0, 0 });
 	gizmoRectComp.SetDimensions({ 100, 100 });
 	gizmoRectComp.Color = Elysium::Math::Vec4(0.75294f, 0.75294f, 0.75294f, 1.0f); 
-	//gizmoRectComp.Color = Elysium::Math::Vec4(0.4f, 0.4f, 0.6f, 1.0f);
 	gizmoRectComp.LineWidth = 3;
 
 	Elysium::FrameBufferSpecification bufferspecs;
@@ -136,6 +137,15 @@ void NormsEditorLayer::OnUpdate()
 		rectComp.SetRotationDegrees(m_controlsPanel->GetRotationDegree());
 		CalculateOutputDimensions();
 
+		m_normalsRotatorShader->Bind();
+		m_normalsRotatorShader->SetInt("flip_h_img", (int)m_controlsPanel->GetFlipHorizontal());
+		m_normalsRotatorShader->SetInt("flip_v_img", (int)m_controlsPanel->GetFlipVertical());
+
+		m_normalsRotatorShader->SetInt("flip_r_channel", (int)m_controlsPanel->GetFlipRed());
+		m_normalsRotatorShader->SetInt("flip_g_channel", (int)m_controlsPanel->GetFlipGreen());
+		m_normalsRotatorShader->SetInt("flip_b_channel", (int)m_controlsPanel->GetFlipBlue());
+		m_normalsRotatorShader->Unbind();
+
 		m_controlsPanel->FlushChangeState();
 	}
 }
@@ -211,13 +221,17 @@ void NormsEditorLayer::OnImGuiRender()
 			{
 				SaveFileDialog();
 			}
+			if (ImGui::MenuItem(ICON_FA_LAYER_GROUP "  Group Export", "Ctrl + G"))
+			{
+				OpenGroupExport();
+			}
 			if (ImGui::MenuItem(ICON_FA_ARCHIVE "  Open Example", "Ctrl + E"))
 			{
 				OpenExampleFile();
 			}
 			ImGui::EndMenu();
 		}
-		if (ImGui::MenuItem("Recenter", ""))
+		if (ImGui::MenuItem("Recenter", "F"))
 		{
 			Recenter();
 		}
@@ -228,6 +242,9 @@ void NormsEditorLayer::OnImGuiRender()
 	m_viewerPanel->OnImGuiRender();
 	m_controlsPanel->OnImGuiRender();
 	m_propertiesPanel->OnImGuiRender();
+
+	if (m_groupExportPanel->IsOpen())
+		m_groupExportPanel->OnImGuiRender();
 
 	ImGui::End();
 
@@ -291,9 +308,36 @@ bool NormsEditorLayer::OnKeyPressed(Elysium::KeyPressedEvent& _event)
 			}
 			break;
 		}
+		case Elysium::Key::S:
+		{
+			if (BIT_CHECK(m_modifierKeyFlag, ModifierKeys::LeftCtrl) || BIT_CHECK(m_modifierKeyFlag, ModifierKeys::RightCtrl))
+			{
+				if (BIT_CHECK(m_modifierKeyFlag, ModifierKeys::LeftShift) || BIT_CHECK(m_modifierKeyFlag, ModifierKeys::RightShift))
+				{
+					SaveFileDialog();
+				}
+				else
+				{
+					SaveCurrentImage(m_currentFilePath);
+				}
+			}
+			break;
+		}
+		case Elysium::Key::E:
+		{
+			OpenExampleFile();
+			break;
+		}
+		case Elysium::Key::G:
+		{
+			OpenGroupExport();
+			break;
+		}
 		case Elysium::Key::F:
+		{
 			Recenter();
 			break;
+		}
 	}
 	return false;
 }
@@ -324,6 +368,11 @@ void NormsEditorLayer::Recenter()
 
 	if (m_activeTexture->GetWidth() > 0 && m_activeTexture->GetHeight() > 0)
 		m_viewerPanel->FocusOnRect(rectComp.GetCenter(), { (float)m_outputSize.x, (float)m_outputSize.y });
+}
+
+void NormsEditorLayer::OpenGroupExport()
+{
+	m_groupExportPanel->OpenPanel();
 }
 
 void NormsEditorLayer::OpenFileDialog()
@@ -444,7 +493,7 @@ void NormsEditorLayer::SaveCurrentImage(const std::string& outputFilepath)
 	cv::Mat rotatedImage;
 	cv::warpAffine(convertedImg, rotatedImage, rotTranslationMat, cv::Size(m_outputSize.x, m_outputSize.y));
 
-	//ELYSIUM_INFO("Writing File to {0}", outputFilepath);
+	ELYSIUM_INFO("Writing File to {0}", outputFilepath);
 	cv::imwrite(outputFilepath, rotatedImage);
 }
 

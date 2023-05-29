@@ -6,6 +6,7 @@
 class ViewerPanel;
 class ControlsPanel;
 class PropertiesPanel;
+class GroupExportPanel;
 
 namespace cv
 {
@@ -39,6 +40,7 @@ private:
 	bool OnKeyReleased(Elysium::KeyReleasedEvent& _event);
 private:
 	void Recenter();
+	void OpenGroupExport();
 	void OpenFileDialog();
 	void SaveFileDialog();
 	void OpenExampleFile();
@@ -49,6 +51,7 @@ private:
 	Elysium::Unique<ViewerPanel> m_viewerPanel;
 	Elysium::Unique<ControlsPanel> m_controlsPanel;
 	Elysium::Unique<PropertiesPanel> m_propertiesPanel;
+	Elysium::Unique<GroupExportPanel> m_groupExportPanel;
 
 	Elysium::Shared<Elysium::Texture2D> m_exampleNormalsMap;
 	Elysium::Shared<Elysium::Texture2D> m_activeTexture;

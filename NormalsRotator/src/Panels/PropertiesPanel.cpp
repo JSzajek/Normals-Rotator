@@ -2,6 +2,7 @@
 #include "PropertiesPanel.h"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 PropertiesPanel::PropertiesPanel()
 	: m_focused(false), m_hovered(false)
@@ -10,11 +11,13 @@ PropertiesPanel::PropertiesPanel()
 
 void PropertiesPanel::OnImGuiRender()
 {
+	ImGuiWindowClass window_class;
+	window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoResizeFlagsMask_;
+	ImGui::SetNextWindowClass(&window_class);
+
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	if (!ImGui::Begin("Properties Panel", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar))
 		ImGui::End();
-
-	ImGui::Columns(1);
 
 	const Elysium::Shared<Elysium::Texture2D> currImg = m_currentTexture.lock();
 	if (currImg.get() != nullptr)

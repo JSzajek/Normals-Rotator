@@ -2,6 +2,7 @@
 #include "ViewerPanel.h"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 ViewerPanel::ViewerPanel(uint32_t* colorTextureId)
 	: m_colorTextureID(colorTextureId),
@@ -24,6 +25,10 @@ ViewerPanel::ViewerPanel(uint32_t* colorTextureId)
 
 void ViewerPanel::OnImGuiRender()
 {
+	ImGuiWindowClass window_class;
+	window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoResizeFlagsMask_;
+	ImGui::SetNextWindowClass(&window_class);
+
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	if (!ImGui::Begin("Viewer Panel", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar))
 		ImGui::End();

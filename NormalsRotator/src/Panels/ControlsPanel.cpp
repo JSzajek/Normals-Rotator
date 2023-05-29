@@ -20,6 +20,10 @@ ControlsPanel::ControlsPanel()
 
 void ControlsPanel::OnImGuiRender()
 {
+	ImGuiWindowClass window_class;
+	window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoResizeFlagsMask_;
+	ImGui::SetNextWindowClass(&window_class);
+
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	if (!ImGui::Begin("Controls Panel", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar))
 		ImGui::End();
@@ -96,7 +100,7 @@ void ControlsPanel::OnImGuiRender()
 		ImGui::EndColumns();
 	}
 
-	ImGui::Text("Image Flip [WIP]");
+	ImGui::Text("Image Flip [Experimental]");
 	if (ImGui::Checkbox("Flip Horizontal", &m_flipHorizontal))
 	{
 		m_changed = true;
@@ -107,7 +111,7 @@ void ControlsPanel::OnImGuiRender()
 	}
 
 	ImGui::Spacing();
-	ImGui::Text("Flip Channels [WIP]");
+	ImGui::Text("Flip Channels [Experimental]");
 	if (ImGui::Checkbox("Flip Red Channel", &m_flipRed))
 	{
 		m_changed = true;

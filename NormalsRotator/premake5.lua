@@ -20,6 +20,7 @@ project "NormalsRotator"
 	{
 		"src/**.h",
 		"src/**.cpp",
+		"../Content/**"
 	}
 
 	includedirs
@@ -35,7 +36,8 @@ project "NormalsRotator"
 		"%{IncludeDir.IconFontCppHeaders}",
 		"%{IncludeDir.stduuid}",
 		"%{IncludeDir.stb_image}",
-		"%{IncludeDir.yaml_cpp}"
+		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.spd_log}"
 	}
 	
 	links
