@@ -23,7 +23,6 @@ function LinkOpenCV4()
 		{
 			"{COPY} " .. '"' .. relativeDir .. "/Debug/bin/" .. '"' .. " %{cfg.targetdir}"
 		}
-
 	filter "configurations:Release"
 		links
 		{
@@ -37,7 +36,6 @@ function LinkOpenCV4()
 		{
 			"{COPY} " .. '"' .. relativeDir .. "/Release/bin/" .. '"' .. " %{cfg.targetdir}"
 		}
-
 	filter "configurations:Dist"
 		links
 		{

@@ -10,9 +10,6 @@
 #include "Elysium/Factories/ShaderFactory.h"
 
 #include <imgui_internal.h>
-
-#include <iconfontcppheaders/IconsFontAwesome5.h>
-
 #include <opencv2/opencv.hpp>
 
 NormsEditorLayer::NormsEditorLayer()
@@ -377,11 +374,12 @@ void NormsEditorLayer::OpenGroupExport()
 
 void NormsEditorLayer::OpenFileDialog()
 {
-	const std::string filepath = Elysium::FileDialogs::OpenFile("All Supported Formats (*.png, *.jpg, *.jpeg, *.jpe, *.jp2, *.tiff, *.tif, *.bmp)\0*.png;*.jpg;*.jpeg;*.jpe;*.jp2;*.tiff;*.tif;*.bmp\0"
+	const std::string filepath = Elysium::FileDialogs::OpenFile("All Supported Formats (*.png, *.jpg, *.jpeg, *.jpe, *.jp2, *.tiff, *.tif, *.exr, *.bmp)\0*.png;*.jpg;*.jpeg;*.jpe;*.jp2;*.tiff;*.tif;*.exr;*.bmp\0"
 																"PNG Image (*.png)\0*.png\0"
 																"JPEG Image (*.jpg, *.jpeg, *.jpe)\0*.jpg;*.jpeg;*.jpe\0"
 																"JPEG-2000 Image (*.jp2)\0*.jp2\0"
 																"TIFF Image (*.tiff, *.tif)\0*.tiff;*.tif\0"
+																"OpenEXR (*.exr, *.EXR)\0*.exr\0"
 																"Windows BMP Image (*.bmp)\0*.bmp\0");
 
 	if (!filepath.empty())
@@ -394,6 +392,7 @@ void NormsEditorLayer::SaveFileDialog()
 																"JPEG Image (*.jpg, *.jpeg, *.jpe)\0*.jpg;*.jpeg;*.jpe\0"
 																"JPEG-2000 Image (*.jp2)\0*.jp2\0"
 																"TIFF Image (*.tiff, *.tif)\0*.tiff;*.tif\0"
+																"OpenEXR (*.exr)\0*.exr\0"
 																"Windows BMP Image (*.bmp)\0*.bmp\0");
 
 	if (!filepath.empty())

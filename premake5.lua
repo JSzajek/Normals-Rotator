@@ -12,6 +12,7 @@ outputdir = "%{cfg.system}-%{cfg.buildcfg}-%{cfg.architecture}"
 
 group "Dependencies"
 	include "vendor/premake"
+	include "Elysium/vendor/glfw"
 	include "Elysium/vendor/yaml-cpp"
 	include "Elysium/vendor/imgui_suite/imgui"
 	include "Elysium/vendor/imgui_suite/imguizmo"

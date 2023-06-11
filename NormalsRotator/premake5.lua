@@ -1,4 +1,4 @@
-include "Elysium/elysium_dependencies.lua"
+include "Elysium/elysiumlink.lua"
 include "Elysium/vendor/imgui_suite/imgui_dependencies.lua"
 include "vendor/opencv_4.6.0/opencv4link.lua"
 
@@ -26,8 +26,6 @@ project "NormalsRotator"
 	includedirs
 	{
 		"src",
-		"%{wks.location}/Elysium/src",
-		"%{wks.location}/Elysium/vendor",
 
 		"%{ImGui_IncludeDir.ImGui}",
 		"%{ImGui_IncludeDir.ImGuizmo}",
@@ -39,12 +37,8 @@ project "NormalsRotator"
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.spd_log}"
 	}
-	
-	links
-	{
-		"Elysium"
-	}
 
+	LinkElysium()
 	LinkOpenCV4()
 
 	filter "system:windows"

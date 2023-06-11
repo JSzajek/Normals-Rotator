@@ -9,7 +9,7 @@ GroupExportPanel::GroupExportPanel()
 void GroupExportPanel::OnImGuiRender()
 {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-	if (!ImGui::Begin("Group Export", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking))
+	if (!ImGui::Begin("Group Export", &m_isOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking))
 		ImGui::End();
 
 	ImGui::Text("WIP");
