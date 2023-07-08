@@ -38,14 +38,22 @@ project "NormalsRotator"
 		"%{IncludeDir.spd_log}"
 	}
 
+	postbuildcommands
+	{
+		"{COPY} " .. '"' .. "%{wks.location}/NormalsRotator/imgui.ini" .. '"' .. " %{cfg.targetdir}"
+	}
+
 	LinkElysium()
 	LinkOpenCV4()
 
 	filter "system:windows"
 		systemversion "latest"
 	filter "configurations:Debug"
+		defines "ELYSIUM_DEBUG"
 		symbols "On"
 	filter "configurations:Release"
+		defines "ELYSIUM_RELEASE"
 		optimize "On"
 	filter "configurations:Dist"
+		defines "ELYSIUM_DIST"
 		optimize "Full"

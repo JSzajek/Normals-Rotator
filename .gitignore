@@ -26,12 +26,12 @@
 
 .vs/
 .git/
+JSON/
 bin/
 bin-int/
+Output/
 
-JSON/
-
-!vendor/opencv_4.6.0/Debug/bin/*
-!vendor/opencv_4.6.0/Debug/lib/*
-!vendor/opencv_4.6.0/Release/bin/*
-!vendor/opencv_4.6.0/Release/lib/*
+!NormalsRotator/vendor/opencv_4.6.0/Debug/bin/*
+!NormalsRotator/vendor/opencv_4.6.0/Debug/lib/*
+!NormalsRotator/vendor/opencv_4.6.0/Release/bin/*
+!NormalsRotator/vendor/opencv_4.6.0/Release/lib/*
