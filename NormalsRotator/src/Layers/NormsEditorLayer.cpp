@@ -20,7 +20,7 @@ NormsEditorLayer::NormsEditorLayer()
 	format.Size = { 0, 0 };
 	format.sRGB = false;
 	format.FilePath = "";
-	format.Format = Elysium::PixelFormat::R8G8B8;
+	format.Format = Elysium::PixelFormat::RGB;
 	m_activeTexture = Elysium::Texture2D::Create(format);
 
 	m_viewerPanel = Elysium::CreateUnique<ViewerPanel>(&m_outputTextureId);
@@ -390,9 +390,6 @@ void NormsEditorLayer::SaveFileDialog()
 {
 	const std::string filepath = Elysium::FileDialogs::SaveFile("PNG Image (*.png)\0*.png\0"
 																"JPEG Image (*.jpg, *.jpeg, *.jpe)\0*.jpg;*.jpeg;*.jpe\0"
-																"JPEG-2000 Image (*.jp2)\0*.jp2\0"
-																"TIFF Image (*.tiff, *.tif)\0*.tiff;*.tif\0"
-																"OpenEXR (*.exr)\0*.exr\0"
 																"Windows BMP Image (*.bmp)\0*.bmp\0");
 
 	if (!filepath.empty())
@@ -417,7 +414,18 @@ void NormsEditorLayer::OpenFile(const std::string& filepath)
 	}
 
 	// Open the file in BGR format (no alpha channel) 8-bit.
-	cv::Mat img = cv::imread(filepath, cv::IMREAD_COLOR);
+	//cv::Mat img = cv::imread(filepath, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+	cv::Mat img;
+	try
+	{
+		img = std::move(cv::imread(filepath, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH | cv::IMREAD_UNCHANGED));
+	}
+	catch (cv::Exception& e)
+	{
+		const char* err_msg = e.what();
+		ELYSIUM_WARN("Error Opening Image File {0}\n\t {1}", filepath, err_msg);
+		return;
+	}
 
 	const uint32_t width = img.cols;
 	const uint32_t height = img.rows;
@@ -427,13 +435,80 @@ void NormsEditorLayer::OpenFile(const std::string& filepath)
 		return;
 	}
 
+	const int depth = img.depth();
+	const int channels = img.channels();
+
+	//if (filepath.find(".EXR") != std::string::npos)
+	//	cv::imwrite("C:/Users/Justin/Desktop/New folder/test.exr", img);
+
+	Elysium::TextureFormat newFormat;
+	newFormat.Size = { static_cast<int>(width), static_cast<int>(height) };
+	newFormat.sRGB = false;
+	newFormat.FilePath = "";
+
+	switch (channels)
+	{
+	case 1:
+		newFormat.Format = Elysium::PixelFormat::R;
+		break;
+	case 2:
+		newFormat.Format = Elysium::PixelFormat::RG;
+		break;
+	case 3:
+		newFormat.Format = Elysium::PixelFormat::RGB;
+		break;
+	case 4:
+		newFormat.Format = Elysium::PixelFormat::RGBA;
+		break;
+	}
+
+	switch (depth)
+	{
+	case CV_8U:
+		newFormat.BitDepth = Elysium::PixelBitDepth::Bit8U;
+		break;
+	case CV_8S:
+		newFormat.BitDepth = Elysium::PixelBitDepth::Bit8S;
+		break;
+	case CV_16U:
+		newFormat.BitDepth = Elysium::PixelBitDepth::Bit16U;
+		break;
+	case CV_16S:
+		newFormat.BitDepth = Elysium::PixelBitDepth::Bit16S;
+		break;
+	case CV_32S:
+		newFormat.BitDepth = Elysium::PixelBitDepth::Bit32S;
+		break;
+	case CV_32F:
+		newFormat.BitDepth = Elysium::PixelBitDepth::Bit32F;
+		break;
+	case CV_64F:
+		ELYSIUM_WARN("Unsupported Image File Depth: 64F");
+		return;
+	case CV_16F:
+		newFormat.BitDepth = Elysium::PixelBitDepth::Bit16F;
+		break;
+	}
+	
+	m_activeTexture = nullptr;
+	m_activeTexture = Elysium::Texture2D::Create(newFormat);
+
 	cv::Mat convertedImg;
-	cv::cvtColor(img, convertedImg, cv::COLOR_BGR2RGB);
-	img.release();
+	if (channels > 2)
+	{
+		cv::cvtColor(img, convertedImg, channels == 3 ? cv::COLOR_BGR2RGB : cv::COLOR_BGRA2RGBA);
+		img.release();
+	}
+	else
+	{
+		convertedImg = img;
+		img.release();
+	}
 
 	m_activeTexture->Resize(width, height);
-	const uint32_t dataSize = width * height * 3;
+	const uint32_t dataSize = width * height * channels;
 	m_activeTexture->SetData((void*)convertedImg.data, dataSize);
+	convertedImg.release();
 
 	m_propertiesPanel->SetImageProperties(m_isExampleFile ? "Example_File" : filepath, m_activeTexture);
 
@@ -454,7 +529,6 @@ void NormsEditorLayer::OpenFile(const std::string& filepath)
 
 		m_controlsPanel->SetClipDimensions({ 0, 0, (int)width, (int)height });
 	}
-
 	m_currentFilePath = filepath;
 }
 
@@ -467,7 +541,7 @@ void NormsEditorLayer::SaveCurrentImage(const std::string& outputFilepath)
 	const uint32_t img_width = m_normalsFBO->GetColorAttachment(0)->GetWidth();
 	const uint32_t img_height = m_normalsFBO->GetColorAttachment(0)->GetHeight();
 
-	cv::Mat currentImage(img_width, img_height, CV_8UC4, cv::Scalar(255, 255, 255, 0));
+	cv::Mat currentImage(img_height, img_width, CV_8UC4, cv::Scalar(255, 255, 255, 0));
 	
 	const uint32_t datasize = img_width * img_height * 4;
 	m_normalsFBO->Bind();
