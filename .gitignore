@@ -1,6 +1,3 @@
-# Prerequisites
-*.d
-
 # Compiled Object files
 *.slo
 *.lo
@@ -11,11 +8,21 @@
 *.gch
 *.pch
 
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
 # Executables
 *.exe
 *.out
 *.app
-
 
 # Visual studio files
 *.vcxproj
@@ -27,11 +34,12 @@
 .vs/
 .git/
 JSON/
-bin/
-bin-int/
+Binaries/*
+Intermediates/*
 Output/
 
-!NormalsRotator/vendor/opencv_4.6.0/Debug/bin/*
-!NormalsRotator/vendor/opencv_4.6.0/Debug/lib/*
-!NormalsRotator/vendor/opencv_4.6.0/Release/bin/*
-!NormalsRotator/vendor/opencv_4.6.0/Release/lib/*
+!NormalsRotator/vendor/opencv_4.7.0/Debug/bin/*
+!NormalsRotator/vendor/opencv_4.7.0/Debug/lib/*
+!NormalsRotator/vendor/opencv_4.7.0/Release/bin/*
+!NormalsRotator/vendor/opencv_4.7.0/Release/lib/*
+

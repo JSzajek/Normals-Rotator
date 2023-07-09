@@ -1,6 +1,6 @@
 include "Elysium/elysiumlink.lua"
 include "Elysium/vendor/imgui_suite/imgui_dependencies.lua"
-include "vendor/opencv_4.6.0/opencv4link.lua"
+include "vendor/opencv_4.7.0/opencv4link.lua"
 
 project "NormalsRotator"
 	kind "ConsoleApp"
@@ -10,8 +10,8 @@ project "NormalsRotator"
 
 	staticruntime "on"
 
-	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
+	targetdir ("%{wks.location}/Binaries/" .. outputdir .. "/%{prj.name}")
+	objdir ("%{wks.location}/Intermediates/" .. outputdir .. "/%{prj.name}")
 
 	pchheader "norm_pch.h"
 	pchsource "src/norm_pch.cpp"
@@ -40,7 +40,9 @@ project "NormalsRotator"
 
 	postbuildcommands
 	{
-		"{COPY} " .. '"' .. "%{wks.location}/NormalsRotator/imgui.ini" .. '"' .. " %{cfg.targetdir}"
+		"{COPY} " .. '"' .. "%{wks.location}/NormalsRotator/imgui.ini" .. '"' .. " %{cfg.targetdir}",
+		"{COPY} " .. '"' .. "%{cfg.targetdir}/../" .. "Elysium/*.dll" .. '"' .. " %{cfg.targetdir}",
+		"{COPY} " .. '"' .. "%{cfg.targetdir}/../" .. "Elysium/*.pdb" .. '"' .. " %{cfg.targetdir}"
 	}
 
 	LinkElysium()
