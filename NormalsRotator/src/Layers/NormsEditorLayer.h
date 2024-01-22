@@ -53,7 +53,6 @@ private:
 	Elysium::Unique<PropertiesPanel> m_propertiesPanel;
 	Elysium::Unique<GroupExportPanel> m_groupExportPanel;
 
-	Elysium::Shared<Elysium::Texture2D> m_exampleNormalsMap;
 	Elysium::Shared<Elysium::Texture2D> m_activeTexture;
 
 	Elysium::Shared<Elysium::Scene> m_scene;
