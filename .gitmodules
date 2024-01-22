@@ -1,3 +1,6 @@
 [submodule "Elysium"]
 	path = Elysium
 	url = https://gitlab.com/jszajek/elysium_v2.git
+[submodule "NormalsRotator/vendor/opencv_lib"]
+	path = NormalsRotator/vendor/opencv_lib
+	url = git@gitlab.com:jszajek/opencv-lib.git
