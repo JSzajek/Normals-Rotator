@@ -1,6 +1,6 @@
 include "Elysium/elysiumlink.lua"
 include "Elysium/vendor/imgui_suite/imgui_dependencies.lua"
-include "vendor/opencv_4.7.0/opencv4link.lua"
+include "vendor/opencv_lib/opencv4link.lua"
 
 project "NormalsRotator"
 	kind "ConsoleApp"
@@ -40,9 +40,7 @@ project "NormalsRotator"
 
 	postbuildcommands
 	{
-		"{COPY} " .. '"' .. "%{wks.location}/NormalsRotator/imgui.ini" .. '"' .. " %{cfg.targetdir}",
-		"{COPY} " .. '"' .. "%{cfg.targetdir}/../" .. "Elysium/*.dll" .. '"' .. " %{cfg.targetdir}",
-		"{COPY} " .. '"' .. "%{cfg.targetdir}/../" .. "Elysium/*.pdb" .. '"' .. " %{cfg.targetdir}"
+		"{COPY} " .. '"' .. "%{wks.location}/NormalsRotator/imgui.ini" .. '"' .. " %{cfg.targetdir}"
 	}
 
 	LinkElysium()

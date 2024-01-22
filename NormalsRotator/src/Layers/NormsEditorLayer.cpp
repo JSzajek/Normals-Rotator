@@ -7,15 +7,26 @@
 #include "Panels/PropertiesPanel.h"
 #include "Panels/GroupExportPanel.h"
 
+#include "OpenCVUtils.h"
+
 #include "Elysium/Factories/ShaderFactory.h"
 
 #include <imgui_internal.h>
 #include <opencv2/opencv.hpp>
 
 NormsEditorLayer::NormsEditorLayer()
+	: m_isExampleFile(false),
+	m_outputTextureId(0),
+	m_modifierKeyFlag(0)
 {
-	m_isExampleFile = false;
+}
 
+NormsEditorLayer::~NormsEditorLayer()
+{
+}
+
+void NormsEditorLayer::OnAttach()
+{
 	Elysium::TextureFormat format;
 	format.Size = { 0, 0 };
 	format.sRGB = false;
@@ -39,7 +50,7 @@ NormsEditorLayer::NormsEditorLayer()
 	auto& gizmoRectComp = m_sprite.AddComponent<Elysium::GizmoRectComponent>();
 	gizmoRectComp.SetTranslation({ 0, 0 });
 	gizmoRectComp.SetDimensions({ 100, 100 });
-	gizmoRectComp.Color = Elysium::Math::Vec4(0.75294f, 0.75294f, 0.75294f, 1.0f); 
+	gizmoRectComp.Color = Elysium::Math::Vec4(0.75294f, 0.75294f, 0.75294f, 1.0f);
 	gizmoRectComp.LineWidth = 3;
 
 	Elysium::FrameBufferSpecification bufferspecs;
@@ -75,14 +86,7 @@ NormsEditorLayer::NormsEditorLayer()
 	ELYSIUM_CORE_ASSERT(m_normalsRotatorShader->IsCompiled(), "Normals Rotator Shader Failed to Compile.");
 	ELYSIUM_CORE_ASSERT(m_spriteShader->IsCompiled(), "Sprite Shader Failed to Compile.");
 	ELYSIUM_CORE_ASSERT(m_lineShader->IsCompiled(), "Line Shader Failed to Compile.");
-}
 
-NormsEditorLayer::~NormsEditorLayer()
-{
-}
-
-void NormsEditorLayer::OnAttach()
-{
 	OpenExampleFile();
 }
 
@@ -144,6 +148,60 @@ void NormsEditorLayer::OnUpdate()
 		m_normalsRotatorShader->Unbind();
 
 		m_controlsPanel->FlushChangeState();
+	}
+
+	if (m_groupExportPanel->IsOpen())
+	{
+		std::vector<std::string> filesToExport;
+		if (m_groupExportPanel->ExportFiles(filesToExport))
+		{
+			auto& rectComp = m_sprite.GetComponent<Elysium::RectTransformComponent>();
+			const Elysium::Math::Vec2 dimensions = rectComp.GetDimensions();
+			const Elysium::Math::Vec2 pivot(dimensions.x * 0.5f, dimensions.y * 0.5f);
+
+			const std::string out_fileDir = Elysium::FileDialogs::OpenDirectory();
+			if (!out_fileDir.empty())
+			{
+				bool flipH = m_controlsPanel->GetFlipHorizontal();
+				bool flipV = m_controlsPanel->GetFlipVertical();
+				int flipCode = 0;
+				if (flipV && flipH)
+					flipCode = -1;
+				else if (flipV)
+					flipCode = 0;
+				else if (flipH)
+					flipCode = 1;
+
+				const std::filesystem::path outputfileDir(out_fileDir);
+				for (const std::string& file : filesToExport)
+				{
+					std::string filename = Elysium::FileUtils::GetFileName(file, true);
+					filename.insert(filename.find_last_of("."), "_Exported");
+
+					const std::string outputPath = (std::filesystem::absolute(outputfileDir) / filename).generic_string();
+
+					cv::Mat img = cv::imread(file, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH | cv::IMREAD_UNCHANGED);
+
+					if (flipH || flipV)
+					{
+						cv::Mat flippedImg;
+						cv::flip(img, flippedImg, 0);
+						img.release();
+						img = std::move(flippedImg);
+					}
+
+					ELYSIUM_INFO("Exporting File {0} to {1}", file, outputPath);
+					OpenCVUtils::SaveImage(&img, outputPath, m_controlsPanel->GetRotationDegree(),
+										   pivot, m_outputOffset, m_outputSize);
+					img.release();
+				}
+
+				std::string exportFileName(Elysium::FileUtils::GetFileName(m_currentFilePath, true));
+				exportFileName.insert(exportFileName.find_last_of("."), "_Exported");
+
+				SaveCurrentImage((std::filesystem::absolute(outputfileDir) / exportFileName).generic_string());
+			}
+		}
 	}
 }
 
@@ -253,8 +311,6 @@ void NormsEditorLayer::OnImGuiRender()
 
 void NormsEditorLayer::OnEvent(Elysium::Event& _event)
 {
-	//ELYSIUM_TRACE(_event.ToString());
-
 	Elysium::EventDispatcher dispatcher(_event);
 	dispatcher.Dispatch<Elysium::WindowResizeEvent>(BIND_EVENT_FN(NormsEditorLayer::OnWindowResize));
 	dispatcher.Dispatch<Elysium::KeyPressedEvent>(BIND_EVENT_FN(NormsEditorLayer::OnKeyPressed));
@@ -414,7 +470,6 @@ void NormsEditorLayer::OpenFile(const std::string& filepath)
 	}
 
 	// Open the file in BGR format (no alpha channel) 8-bit.
-	//cv::Mat img = cv::imread(filepath, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
 	cv::Mat img;
 	try
 	{
@@ -437,9 +492,6 @@ void NormsEditorLayer::OpenFile(const std::string& filepath)
 
 	const int depth = img.depth();
 	const int channels = img.channels();
-
-	//if (filepath.find(".EXR") != std::string::npos)
-	//	cv::imwrite("C:/Users/Justin/Desktop/New folder/test.exr", img);
 
 	Elysium::TextureFormat newFormat;
 	newFormat.Size = { static_cast<int>(width), static_cast<int>(height) };
@@ -556,18 +608,23 @@ void NormsEditorLayer::SaveCurrentImage(const std::string& outputFilepath)
 
 	auto& rectComp = m_sprite.GetComponent<Elysium::RectTransformComponent>();
 	const Elysium::Math::Vec2 dimensions = rectComp.GetDimensions();
-
-	cv::Point2f center(dimensions.x * 0.5f, dimensions.y * 0.5f);
-	cv::Mat rotTranslationMat = cv::getRotationMatrix2D(center, -m_controlsPanel->GetRotationDegree(), 1);
-
-	rotTranslationMat.at<double>(0, 2) += -m_outputOffset.x;
-	rotTranslationMat.at<double>(1, 2) += -m_outputOffset.y;
-
-	cv::Mat rotatedImage;
-	cv::warpAffine(convertedImg, rotatedImage, rotTranslationMat, cv::Size(m_outputSize.x, m_outputSize.y));
+	const Elysium::Math::Vec2 pivot(dimensions.x * 0.5f, dimensions.y * 0.5f);
 
 	ELYSIUM_INFO("Writing File to {0}", outputFilepath);
-	cv::imwrite(outputFilepath, rotatedImage);
+	OpenCVUtils::SaveImage(&convertedImg, outputFilepath, m_controlsPanel->GetRotationDegree(),
+						   pivot, m_outputOffset, m_outputSize);
+
+	//cv::Point2f center(dimensions.x * 0.5f, dimensions.y * 0.5f);
+	//cv::Mat rotTranslationMat = cv::getRotationMatrix2D(center, -m_controlsPanel->GetRotationDegree(), 1);
+	//
+	//rotTranslationMat.at<double>(0, 2) += -m_outputOffset.x;
+	//rotTranslationMat.at<double>(1, 2) += -m_outputOffset.y;
+	//
+	//cv::Mat rotatedImage;
+	//cv::warpAffine(convertedImg, rotatedImage, rotTranslationMat, cv::Size(m_outputSize.x, m_outputSize.y));
+	//
+	//ELYSIUM_INFO("Writing File to {0}", outputFilepath);
+	//cv::imwrite(outputFilepath, rotatedImage);
 }
 
 void NormsEditorLayer::CalculateOutputDimensions()
